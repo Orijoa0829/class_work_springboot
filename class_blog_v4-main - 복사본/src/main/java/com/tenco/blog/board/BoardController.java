@@ -1,6 +1,5 @@
 package com.tenco.blog.board;
 
-
 import com.tenco.blog._core.errors.exception.Exception403;
 import com.tenco.blog._core.errors.exception.Exception404;
 import com.tenco.blog.user.User;
@@ -46,9 +45,7 @@ public class BoardController {
                          HttpSession session) {
 
         log.info("게시글 수정 기능 요청 - boardId : {}, 새 제목 {} ", boardId, reqDTO.getTitle());
-
         User sessionUser = (User) session.getAttribute("sessionUser");
-
 
         reqDTO.validate();
         Board board = boardRepository.findById(boardId);

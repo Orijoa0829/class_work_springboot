@@ -1,8 +1,6 @@
 package com.tenco.blog.user;
 
 import com.tenco.blog._core.errors.exception.Exception400;
-import com.tenco.blog._core.errors.exception.Exception401;
-import com.tenco.blog.board.BoardController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +32,7 @@ public class UserController {
     public String update(UserRequest.UpdateDTO reqDTO,
                          HttpSession session, HttpServletRequest request) {
         log.info("회원정보 수정 요청");
-
         User sessionUser = (User) session.getAttribute("sessionUser");
-
         reqDTO.validate();
         User updateUser = userRepository.updateById(sessionUser.getId(), reqDTO);
         session.setAttribute("sessionUser", updateUser);
@@ -56,10 +52,6 @@ public class UserController {
         log.info("사용자 이메일 : {} ", joinDTO.getEmail());
         joinDTO.validate();
         User existUser = userRepository.findByUsername(joinDTO.getUsername());
-        if (existUser != null) {
-            throw new Exception401("이미 존재하는 사용자명 입니다 "
-                    + joinDTO.getUsername());
-        }
         User user = joinDTO.toEntity();
         userRepository.save(user);
         return "redirect:/login-form";

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS 테스트</title>
+</head>
+<body>
+<button onclick="callAPI()">API 호출</button>
+<div id="result"></div>
+
+<script>
+    function callAPI() {
+        fetch('http://localhost:8080/api-test/user')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = JSON.stringify(data);
+            })
+            .catch( error => {
+                console.error('CORS 에러 : ',error);
+                document.getElementById('result').innerHTML = 'CORS 에러';
+            });
+    }
+</script>
+</body>
+</html>

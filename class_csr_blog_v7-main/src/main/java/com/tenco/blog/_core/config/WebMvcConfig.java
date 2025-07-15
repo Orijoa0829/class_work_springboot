@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @RequiredArgsConstructor
-@Configuration // IoC 처리 (싱글톤 패턴 관리)
+//@Configuration // IoC 처리 (싱글톤 패턴 관리)
 public class WebMvcConfig implements WebMvcConfigurer {
 
     // DI 처리(생성자 의존 주입)

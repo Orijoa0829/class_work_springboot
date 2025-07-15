@@ -1,6 +1,8 @@
 package com.tenco.blog.user;
 
 import com.tenco.blog._core.common.ApiUtil;
+import com.tenco.blog.board.BoardRequest;
+import com.tenco.blog.board.BoardResponse;
 import com.tenco.blog.utils.Define;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -42,60 +44,49 @@ public class UserRestController {
                 .body(new ApiUtil<>(joinUser));
     }
 
-    //로그인 API
+    // 로그인 API
+    // http://localhost:8080/login
     @PostMapping("/login")
     public ResponseEntity<ApiUtil<UserResponse.LoginDTO>> login(
             @RequestBody UserRequest.LoginDTO reqDTO, HttpSession session) {
-        log.info("로그인 API 호출 - 사용자명 : {}", reqDTO.getUsername());
-        reqDTO.validate();
 
+        log.info("로그인 API 호출 - 사용자명: {}", reqDTO.getUsername());
+        reqDTO.validate();
         UserResponse.LoginDTO loginUser = userService.login(reqDTO);
-        session.setAttribute(Define.SESSION_USER, loginUser);
+        // 세션에 정보 저장
+        //session.setAttribute(Define.SESSION_USER, loginUser);
         return ResponseEntity.ok(new ApiUtil<>(loginUser));
     }
 
-    // 로그아웃 API
-    @GetMapping
-    public ResponseEntity<ApiUtil<String>> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok(new ApiUtil<>("로그아웃 성공"));
-
-    }
-
-    // 회원 정보 조회
+    // 회원 정보 API
     @GetMapping("/api/users/{id}")
     public ResponseEntity<ApiUtil<UserResponse.DetailDTO>> getUserInfo(
             @PathVariable(name = "id") Long id, HttpSession session) {
 
-        log.info("회원정보 API 호출 - ID {} ",id);
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
+        log.info("회원 정보 API 호출 - ID: {}", id);
+        User sessionUser = (User)session.getAttribute(Define.SESSION_USER);
         UserResponse.DetailDTO userDetail = userService.findUserById(id, sessionUser);
         return ResponseEntity.ok(new ApiUtil<>(userDetail));
-
     }
+
     // 회원 정보 수정
     @PutMapping("/api/users/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable(name="id")long id,
-                                        @RequestBody UserRequest.UpdateDTO updateDTO){
-        //인증검사는 인터셉터에서 처리 됨.
-        //유효성 검사
+    public ResponseEntity<?> updateUser(@PathVariable(name = "id")Long id,
+                                        @RequestBody UserRequest.UpdateDTO updateDTO) {
+        // 인증검사는 인터셉터에 처리 됨
+        // 유효성 검사
         updateDTO.validate();
         UserResponse.UpdateDTO updateUser = userService.updateById(id, updateDTO);
         return ResponseEntity.ok(new ApiUtil<>(updateUser));
     }
 
 
+    @GetMapping("/logout")
+    public ResponseEntity<ApiUtil<String>> logout(HttpSession session) {
+        log.info("로그아웃 API 호출");
+        session.invalidate();
+        return ResponseEntity.ok(new ApiUtil<>("로그아웃 성공"));
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
+}

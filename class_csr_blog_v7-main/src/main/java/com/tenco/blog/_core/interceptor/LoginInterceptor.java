@@ -1,14 +1,22 @@
 package com.tenco.blog._core.interceptor;
 
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.tenco.blog._core.errors.exception.Exception401;
+import com.tenco.blog._core.errors.exception.Exception500;
+import com.tenco.blog._core.utils.Define;
+import com.tenco.blog._core.utils.JwtUtil;
+import com.tenco.blog.user.SessionUser;
 import com.tenco.blog.user.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+@Slf4j
 @Component // Ioc 대상 (싱글톤 패턴으로 관리)
 public class LoginInterceptor implements HandlerInterceptor {
 
@@ -16,17 +24,38 @@ public class LoginInterceptor implements HandlerInterceptor {
      * preHandle - 컨트롤러에 들어 가지 전에 동작 하는 메서드이다.
      * 리턴타입이 boolean 이라서 true ---> 컨트롤러 안으로 들어간다, false --> 못 들어 감
      */
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        log.debug("==== JWT 인증 인터셉터 시작 ====");
+        String jwt = request.getHeader("Authorization");
+        // Bearer + 공백
+        if (jwt == null || !jwt.startsWith("Bearer ")) {
+            throw new Exception401("로그인 인터셉터 : JWT 토큰을 전달해 주세요.");
+        }
+        jwt = jwt.replace("Bearer ", "");
 
-       HttpSession session = request.getSession();
-       System.out.println("인터셉터 동작 확인 : " + request.getRequestURL());
-       User sessionUser = (User)session.getAttribute("sessionUser");
-       if(sessionUser == null) {
-           throw new Exception401("로그인 먼저 해주세요");
-           //return false;
-       }
-       return true;
+        try {
+            SessionUser sessionUser = JwtUtil.verify(jwt);
+
+            // 구분 중요 !!!
+            //HttpSession session = request.getSession(); // JSSIONID: "adsf"
+            //session.setAttribute(Define.SESSION_USER,sessionUser);
+
+            // JMT 는 stateless 개념을 지키기 위해서 나옴(모바일 쿠키에 접근 못함)
+            // request.setAttribute는 요청 단위로 데이터를 저장하고 소멸한다.
+            // 즉, 해당 데이터는 요청이 처리된 후 사라지며, 서버 세션 메모리에 저장되지 않는다.
+            request.setAttribute(Define.SESSION_USER, sessionUser);
+            return true;
+
+
+        } catch (TokenExpiredException e) {
+            throw new Exception401("토큰 만료시간이 지났어요 . 다시 로그인하세요");
+        } catch (JWTDecodeException e) {
+            throw new Exception401("토큰이 유효하지 않습니다");
+        } catch (Exception e) {
+            throw new Exception500(e.getMessage());
+        }
     }
 
     // 뷰가 렌터링 되기전에 콜백 되는 메서드

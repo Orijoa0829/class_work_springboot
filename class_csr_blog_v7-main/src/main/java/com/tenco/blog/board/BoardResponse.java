@@ -1,7 +1,7 @@
 package com.tenco.blog.board;
 
-
 import com.tenco.blog.reply.Reply;
+import com.tenco.blog.user.SessionUser;
 import com.tenco.blog.user.User;
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +27,7 @@ public class BoardResponse {
             this.writerName = board.getUser().getUsername();
             this.createdAt = board.getCreatedAt().toString();
         }
-    }
+    } // end of inner class
 
     // 게시글 상세보기 응답 DTO 설계
     @Data
@@ -40,25 +40,23 @@ public class BoardResponse {
         private boolean isBoardOwner;
         private List<ReplyDTO> replies;
 
-        public DetailDTO(Board board,User sessionUser){
+        public DetailDTO(Board board, SessionUser sessionUser) {
             this.id = board.getId();
             this.title = board.getTitle();
             this.content = board.getContent();
             this.writerName = board.getUser().getUsername();
             this.createdAt = board.getCreatedAt().toString();
-            this.isBoardOwner=sessionUser != null && board.isOwner(sessionUser.getId());
-            this.replies=new ArrayList<>();
-            for(Reply reply : board.getReplies()){
-                //응답 DTO 변수 안에 값을 할당 하는 코드
+            this.isBoardOwner = sessionUser != null && board.isOwner(sessionUser.getId());
+            this.replies = new ArrayList<>();
+            for (Reply reply : board.getReplies()) {
                 this.replies.add(new ReplyDTO(reply, sessionUser));
             }
-
         }
     }
 
-    //댓글 정보
+    // 댓글 정보 DTO
     @Data
-    private static class ReplyDTO {
+    public static class ReplyDTO {
         private Long id;
         private String comment;
         private String writerName;
@@ -66,8 +64,7 @@ public class BoardResponse {
         private boolean isReplyOwner;
 
         @Builder
-
-        public ReplyDTO(Reply reply, User sessionUser) {
+        public ReplyDTO(Reply reply, SessionUser sessionUser) {
             this.id = reply.getId();
             this.comment = reply.getComment();
             this.writerName = reply.getUser().getUsername();
@@ -75,41 +72,43 @@ public class BoardResponse {
             this.isReplyOwner = sessionUser != null && reply.isOwner(sessionUser.getId());
         }
     }
-        @Data
-        public static class saveDTO {
+
+    // 게시글 작성 응답 DTO
+    @Data
+    public static class SaveDTO {
         private Long id;
         private String title;
         private String content;
         private String writerName;
         private String createdAt;
-            @Builder
-            public saveDTO(Board board) {
-                this.id = board.getId();
-                this.title = board.getTitle();
-                this.content = board.getContent();
-                this.writerName = board.getUser().getUsername();
-                this.createdAt = board.getCreatedAt().toString();
-            }
+
+        @Builder
+        public SaveDTO(Board board) {
+            this.id = board.getId();
+            this.title = board.getTitle();
+            this.content = board.getContent();
+            this.writerName = board.getUser().getUsername();
+            this.createdAt = board.getCreatedAt().toString();
         }
-        //게시글 수정 응답 DTO
-        @Data
-        public static class UpdateDTO {
-            private Long id;
-            private String title;
-            private String content;
-            private String writerName;
-            private String createdAt;
+    }
 
-            @Builder
-            public UpdateDTO(Board board) {
-                this.id = board.getId();
-                this.title = board.getTitle();
-                this.content = board.getContent();
-                this.writerName = board.getUser().getUsername();
-                this.createdAt = board.getCreatedAt().toString();
-            }
+    // 게시글 수정 응답 DTO
+    @Data
+    public static class UpdateDTO {
+
+        private Long id;
+        private String title;
+        private String content;
+        private String writerName;
+        private String createdAt;
+
+        @Builder
+        public UpdateDTO(Board board) {
+            this.id = board.getId();
+            this.title = board.getTitle();
+            this.content = board.getContent();
+            this.writerName = board.getUser().getUsername();
+            this.createdAt = board.getCreatedAt().toString();
         }
-
-
-
+    }
 }

@@ -1,6 +1,8 @@
 package com.tenco.blog.board;
 
 import com.tenco.blog.user.User;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
@@ -12,11 +14,16 @@ public class BoardRequest {
     // 게시글 저장 DTO
     @Data
     public static class SaveDTO {
+        @NotEmpty(message = "제목은 공백일 수 없습니다")
+        @Size(min = 1, max = 100, message = "제목은 1~100자 이내로 작성해주세요")
         private String title;
+
+        @NotEmpty(message = "내용은 공백일 수 없습니다")
+        @Size(min = 1, max = 5000, message = "내용은 1~5000자 이내로 작성해주세요")
         private String content;
         // username 제거 : 세션에서 가져올 예정
 
-        // (User) <-- toEntity() 호출할 때 세션에서 가져와서 넣어 주면 됨
+
         public Board toEntity(User user) {
             return Board.builder()
                     .title(this.title)
@@ -24,35 +31,18 @@ public class BoardRequest {
                     .content(this.content)
                     .build();
         }
-
-        public void validate() {
-            if(title == null || title.trim().isEmpty()) {
-                throw new IllegalArgumentException("제목은 필수야");
-            }
-            if(content == null || content.trim().isEmpty()) {
-                throw new IllegalArgumentException("내용은 필수야");
-            }
-        }
     }
 
     // 게시글 수정용 DTO 설계
     @Data
     public static class UpdateDTO {
+        @NotEmpty(message = "제목은 공백일 수 없습니다")
+        @Size(min = 1, max = 100, message = "제목은 1~100자 이내로 작성해주세요")
         private String title;
+
+        @NotEmpty(message = "내용은 공백일 수 없습니다")
+        @Size(min = 1, max = 5000, message = "내용은 1~5000자 이내로 작성해주세요")
         private String content;
-
-        // toEntity 메서드 안 만들 예정 (더티 체킹 활용)
-        // em.find() <--- Board <-- 영속화 <-- 상태값을 변경하면 자동 갱신
-
-        // 유효성 검사
-        public void validate() {
-            if(title == null || title.trim().isEmpty()) {
-                throw new IllegalArgumentException("제목은 필수야");
-            }
-            if(content == null || content.trim().isEmpty()) {
-                throw new IllegalArgumentException("내용은 필수야");
-            }
-        }
     }
 
 
